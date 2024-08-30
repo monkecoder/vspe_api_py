@@ -91,18 +91,33 @@ def destroy_all_devices():
 
 
 @main_decorator
-def show_devices():
+def show_device(com_num):
+    device_id = vspe_getDeviceIdByComPortIndex(com_num)
+    device_info = vspe_getDeviceInfo(device_id)
+    if device_info:
+        print("Устройство {0}: {1} ({2}), статус: {3}, используется: {4}".format(
+            com_num, device_info['name'], device_info['initString'],
+            "ОК" if device_info['ok'] else "ОШИБКА", "ДА" if device_info['used'] else "НЕТ"
+        ))
+    else:
+        print("Устройство {} не существует".format(com_num))
+
+    return 0
+
+
+@main_decorator
+def show_all_devices():
     count = vspe_getDevicesCount()
     for i in range(count):
         device_id = vspe_getDeviceIdByIdx(i)
         device_info = vspe_getDeviceInfo(device_id)
         if device_info:
-            print("Устройство {0}: {1} ({2}), статус: {3}, используется: {4}".format(
+            print("Устройство №{0}: {1} ({2}), статус: {3}, используется: {4}".format(
                 i + 1, device_info['name'], device_info['initString'],
                 "ОК" if device_info['ok'] else "ОШИБКА", "ДА" if device_info['used'] else "НЕТ"
             ))
         else:
-            print("Устройство {}: <Warning> Нет информации об устройстве".format(i + 1))
+            print("Устройство №{}: <Warning> Нет информации об устройстве".format(i + 1))
 
     if count == 0:
         print("Нет устройств")
@@ -112,12 +127,12 @@ def show_devices():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=("start", "stop", "stopall", "show"))
+    parser.add_argument("command", choices=("start", "stop", "stopall", "show", "showall"))
     parser.add_argument("com_num", type=int, nargs="?")
     parser_args = parser.parse_args()
 
-    if parser_args.command in {"start", "stop"} and parser_args.com_num is None:
-        parser.error("stop/start command needs COM-number")
+    if parser_args.command in {"start", "stop", "show"} and parser_args.com_num is None:
+        parser.error("stop/start/show commands need COM-number")
 
     match parser_args.command:
         case "start":
@@ -127,9 +142,11 @@ if __name__ == "__main__":
         case "stopall":
             err = destroy_all_devices()
         case "show":
-            err = show_devices()
+            err = show_device(parser_args.com_num)
+        case "showall":
+            err = show_all_devices()
         case _:
             print("???")
             err = -10
 
-    quit(err)
+    raise SystemExit(err)
