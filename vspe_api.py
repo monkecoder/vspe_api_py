@@ -195,20 +195,21 @@ def vspe_getDeviceInfo(deviceId: int) -> typing.Optional[dict[str, typing.Union[
     :param deviceId: Идентификатор устройства
     :returns: Словарь параметров (название, строка инициализации, статус, использование), либо None
     """
-    name = ctypes.pointer(ctypes.c_char_p())
-    initString = ctypes.pointer(ctypes.c_char_p())
-    ok = ctypes.pointer(ctypes.c_int())
-    used = ctypes.pointer(ctypes.c_int())
-    result = VSPE_API.vspe_getDeviceInfo(deviceId, name, initString, ok, used)
+    name = ctypes.c_char_p()
+    initString = ctypes.c_char_p()
+    ok = ctypes.c_int()
+    used = ctypes.c_int()
+    result = VSPE_API.vspe_getDeviceInfo(deviceId, ctypes.pointer(name), ctypes.pointer(initString),
+                                         ctypes.pointer(ok), ctypes.pointer(used))
     if result:
         return {
-            'name': name[0].decode('utf8'),
-            'initString': initString[0].decode('utf8'),
-            'ok': ok[0],
-            'used': used[0],
+            'name': name.value.decode('utf8'),
+            'initString': initString.value.decode('utf8'),
+            'ok': ok.value,
+            'used': used.value,
         }
-    else:
-        return None
+
+    return None
 
 
 # Reinitialize device by deviceId
