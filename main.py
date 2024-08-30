@@ -97,7 +97,7 @@ def show_devices():
         device_id = vspe_getDeviceIdByIdx(i)
         device_info = vspe_getDeviceInfo(device_id)
         if device_info:
-            print("Устройство {0}: {1} ({2}) статус: {3}, используется: {4}".format(
+            print("Устройство {0}: {1} ({2}), статус: {3}, используется: {4}".format(
                 i + 1, device_info['name'], device_info['initString'],
                 "ОК" if device_info['ok'] else "ОШИБКА", "ДА" if device_info['used'] else "НЕТ"
             ))
